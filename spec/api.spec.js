@@ -13,8 +13,8 @@ describe("/api", () => {
         .get("/api/topics")
         .expect(200)
         .then(response => {
-          expect(response.body).to.be.an("array");
-          expect(response.body[0]).to.have.keys(["slug", "description"]);
+          expect(response.body.topic).to.be.an("array");
+          expect(response.body.topic[0]).to.have.keys(["slug", "description"]);
         });
     });
   });
@@ -41,7 +41,7 @@ describe("/api", () => {
         .get("/api/articles/1")
         .expect(200)
         .then(response => {
-          expect(response.body).to.be.an("object");
+          expect(response.body.article).to.be.an("object");
           expect(response.body.article).to.have.keys([
             "author",
             "title",
@@ -65,22 +65,91 @@ describe("/api", () => {
         });
     });
   });
+  // describe("/articles/:article_id/comments", () => {
+  //   it("POST request returns 201 and the new comment added to the requested article", () => {
+  //     return request(app)
+  //       .post("/api/articles/3/comments")
+  //       .send({ username: "butter_bridge", body: "this is a new comment" })
+  //       .expect(201)
+  //       .then(response => {
+  //         expect(response.body).to.be.an("object");
+  //         expect(response.body.comment[0]).to.eql({
+  //           body: "this is a new comment",
+  //           article_id: "3",
+  //           author: "butter_bridge",
+  //           votes: 16,
+  //           created_at: new Date(now)
+  //         });
+  //       });
+  //   });
+  // });
   describe("/articles/:article_id/comments", () => {
-    it("POST request returns 201 and the new comment added to the requested article", () => {
+    it("GET request returns 200 and an array of all comments for the given article_id", () => {
       return request(app)
-        .post("/api/articles/3/comments")
-        .send({ username: "salexsmith", body: "this is a new comment" })
-        .expect(201)
+        .get("/api/articles/1/comments")
+        .expect(200)
         .then(response => {
           expect(response.body).to.be.an("object");
-          expect(response.body.comment[0]).to.eql({
-            body: "this is a new comment",
-            article_id: "3",
-            author: "salexsmith",
-            votes: 16,
-            created_at: new Date(now)
-          });
+          expect(response.body.comments[0]).to.have.keys([
+            "comment_id",
+            "votes",
+            "author",
+            "created_at",
+            "body"
+          ]);
         });
+    });
+  });
+  describe("/articles", () => {
+    it("GET request returns 200 and all articles available", () => {
+      return request(app)
+        .get("/api/articles")
+        .expect(200)
+        .then(response => {
+          expect(response.body).to.be.an("array");
+          expect(response.body[0]).to.have.keys([
+            "author",
+            "title",
+            "article_id",
+            "topic",
+            "created_at",
+            "votes",
+            "comment_count"
+          ]);
+        });
+    });
+    describe("/articles?sort_by", () => {
+      it("GET request returns 200 and all articles sorted by the passed query", () => {
+        return request(app)
+          .get("/api/treasures?sort_by=votes")
+          .expect(200)
+          .then(response => {
+            expect(response.body).to.be.an("array");
+            expect(response.body[0]).to.have.keys([
+              "author",
+              "title",
+              "article_id",
+              "topic",
+              "created_at",
+              "votes",
+              "comment_count"
+            ]);
+            expect(response.body).to.be.sortedBy("votes");
+          });
+      });
+    });
+    describe("/comments/:comments_id", () => {
+      it("PATCH request returns 201 and the updated comment", () => {
+        return request(app)
+          .patch("/api/comments/1")
+          .send({ inc_votes: 10 })
+          .expect(202)
+          .then(response => {
+            expect(response.body).to.be.an("object");
+            expect(response.body.comment[0].votes).to.equal(10);
+          });
+      });
+      // it("DELETE request returns 400", () => {});
     });
   });
 });
