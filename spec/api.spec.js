@@ -46,155 +46,6 @@ describe("/api", () => {
         });
     });
   });
-  describe("/articles/:article_id", () => {
-    it("GET request returns 200 and the selected article", () => {
-      return request(app)
-        .get("/api/articles/1")
-        .expect(200)
-        .then(response => {
-          expect(response.body.article).to.be.an("object");
-          expect(response.body.article).to.have.keys([
-            "author",
-            "title",
-            "article_id",
-            "body",
-            "topic",
-            "created_at",
-            "votes",
-            "comment_count"
-          ]);
-        });
-    });
-    it("GET request returns 400 and the correct error message when an incorrect article_id is passed", () => {
-      return request(app)
-        .get("/api/users/500")
-        .expect(400)
-        .then(response => {
-          expect(response.body).to.eql({ message: "Value does not exist" });
-        });
-    });
-    it("GET request returns 400 and the correct error message when an incorrect article_id is passed", () => {
-      return request(app)
-        .get("/api/users/not_a_number")
-        .expect(400)
-        .then(response => {
-          expect(response.body).to.eql({ message: "Value does not exist" });
-        });
-    });
-    it("PATCH request returns 202 and returns the updated article", () => {
-      return request(app)
-        .patch("/api/articles/2")
-        .send({ inc_votes: 10 })
-        .expect(202)
-        .then(response => {
-          expect(response.body).to.be.an("object");
-          expect(response.body.article[0].votes).to.equal(10);
-        });
-    });
-    it("PATCH request returns 400 and correct error message when trying to update invalid article", () => {
-      return request(app)
-        .patch("/api/articles/not_a_number")
-        .send({ inc_votes: 10 })
-        .expect(400)
-        .then(response => {
-          expect(response.body).to.eql({ message: "Bad request" });
-        });
-    });
-    it("PATCH request returns 400 and correct error message when trying to update article that does not exist", () => {
-      return request(app)
-        .patch("/api/articles/500")
-        .send({ inc_votes: 10 })
-        .expect(400)
-        .then(response => {
-          expect(response.body.message).to.eql("Value does not exist");
-        });
-    });
-  });
-  describe("/articles/:article_id/comments", () => {
-    it("POST request returns 201 and the new comment added to the requested article", () => {
-      return request(app)
-        .post("/api/articles/2/comments")
-        .send({ username: "butter_bridge", body: "this is a new comment" })
-        .expect(201)
-        .then(response => {
-          expect(response.body).to.be.an("object");
-          expect(response.body.comment[0]).to.have.keys([
-            "body",
-            "article_id",
-            "author",
-            "votes",
-            "comment_id",
-            "created_at"
-          ]);
-        });
-    });
-    it('POST request returns 400 and message bad request when one "not null" property is missing', () => {
-      return request(app)
-        .post("/api/articles/2/comments")
-        .send({
-          username: "salexsmth",
-          article_id: 2,
-          votes: 0
-        })
-        .expect(400)
-        .then(response => {
-          expect(response.body).to.eql({ message: "Bad request" });
-        });
-    });
-  });
-  describe("/articles/:article_id/comments", () => {
-    it("GET request returns 200 and an array of all comments for the given article_id", () => {
-      return request(app)
-        .get("/api/articles/1/comments")
-        .expect(200)
-        .then(response => {
-          expect(response.body).to.be.an("object");
-          expect(response.body.comments[0]).to.have.keys([
-            "comment_id",
-            "votes",
-            "author",
-            "created_at",
-            "body"
-          ]);
-        });
-    });
-    it("GET request returns 200 and an array of all comments for the given article_id filtered by author username", () => {
-      return request(app)
-        .get("/api/articles/1/comments?sort_by=author")
-        .expect(200)
-        .then(response => {
-          expect(response.body).to.be.an("object");
-          expect(response.body.comments[0]).to.have.keys([
-            "comment_id",
-            "votes",
-            "author",
-            "created_at",
-            "body"
-          ]);
-          expect(response.body.comments).to.be.sortedBy("author", {
-            descending: true
-          });
-        });
-    });
-    it("GET request returns 200 and an array of all comments for the given article_id filtered by created_at as default and ordered in ascending order", () => {
-      return request(app)
-        .get("/api/articles/1/comments?order=desc")
-        .expect(200)
-        .then(response => {
-          expect(response.body).to.be.an("object");
-          expect(response.body.comments[0]).to.have.keys([
-            "comment_id",
-            "votes",
-            "author",
-            "created_at",
-            "body"
-          ]);
-          expect(response.body.comments).to.be.sortedBy("created_at", {
-            descending: true
-          });
-        });
-    });
-  });
   describe("/articles", () => {
     it("GET request returns 200 and all articles available", () => {
       return request(app)
@@ -252,6 +103,14 @@ describe("/api", () => {
             expect(response.body).to.be.sortedBy("created_at", {
               descending: true
             });
+          });
+      });
+      it("GET request returns 400 and error message bad request when non-existent query is passed", () => {
+        return request(app)
+          .get("/api/articles?sort_by=pink")
+          .expect(400)
+          .then(response => {
+            expect(response.body).to.eql({ message: "Bad request" });
           });
       });
       it("GET request returns 200 and all articles ordered by descending as default", () => {
@@ -316,23 +175,239 @@ describe("/api", () => {
             });
           });
       });
-    });
-    describe("/comments/:comments_id", () => {
-      it("PATCH request returns 201 and the updated comment", () => {
+      it("GET request returns 400 and error message value does not exist when articles filtered by non-existent topic", () => {
         return request(app)
-          .patch("/api/comments/1")
-          .send({ inc_votes: 10 })
-          .expect(202)
+          .get("/api/articles?topic=ducks")
+          .expect(400)
           .then(response => {
-            expect(response.body).to.be.an("object");
-            expect(response.body.comment[0].votes).to.equal(10);
+            expect(response.body).to.eql({ message: "Value does not exist" });
           });
       });
-      it("DELETE request returns 204 and has no body", () => {
+      it("GET request returns 400 and error message bad request when articles filtered by non-existent username", () => {
         return request(app)
-          .delete("/api/comments/1")
-          .expect(204);
+          .get("/api/articles?author=salex")
+          .expect(400)
+          .then(response => {
+            expect(response.body).to.eql({ message: "Value does not exist" });
+          });
       });
+      describe("/articles/:article_id", () => {
+        it("GET request returns 200 and the selected article", () => {
+          return request(app)
+            .get("/api/articles/1")
+            .expect(200)
+            .then(response => {
+              expect(response.body.article).to.be.an("object");
+              expect(response.body.article).to.have.keys([
+                "author",
+                "title",
+                "article_id",
+                "body",
+                "topic",
+                "created_at",
+                "votes",
+                "comment_count"
+              ]);
+            });
+        });
+        it("GET request returns 400 and the correct error message when an non-existent article_id is passed", () => {
+          return request(app)
+            .get("/api/articles/500")
+            .expect(400)
+            .then(response => {
+              expect(response.body).to.eql({ message: "Value does not exist" });
+            });
+        });
+        it("GET request returns 400 and the correct error message when an invalid article_id is passed", () => {
+          return request(app)
+            .get("/api/articles/not_a_number")
+            .expect(400)
+            .then(response => {
+              expect(response.body).to.eql({ message: "Bad request" });
+            });
+        });
+        it("PATCH request returns 202 and returns the updated article", () => {
+          return request(app)
+            .patch("/api/articles/2")
+            .send({ inc_votes: 10 })
+            .expect(202)
+            .then(response => {
+              expect(response.body).to.be.an("object");
+              expect(response.body.article[0].votes).to.equal(10);
+            });
+        });
+        it("PATCH request returns 400 and correct error message when trying to update invalid article", () => {
+          return request(app)
+            .patch("/api/articles/not_a_number")
+            .send({ inc_votes: 10 })
+            .expect(400)
+            .then(response => {
+              expect(response.body).to.eql({ message: "Bad request" });
+            });
+        });
+        it("PATCH request returns 400 and correct error message when trying to update article that does not exist", () => {
+          return request(app)
+            .patch("/api/articles/500")
+            .send({ inc_votes: 10 })
+            .expect(400)
+            .then(response => {
+              expect(response.body.message).to.eql("Value does not exist");
+            });
+        });
+      });
+      describe("/articles/:article_id/comments", () => {
+        it("POST request returns 201 and the new comment added to the requested article", () => {
+          return request(app)
+            .post("/api/articles/2/comments")
+            .send({ username: "butter_bridge", body: "this is a new comment" })
+            .expect(201)
+            .then(response => {
+              expect(response.body).to.be.an("object");
+              expect(response.body.comment[0]).to.have.keys([
+                "body",
+                "article_id",
+                "author",
+                "votes",
+                "comment_id",
+                "created_at"
+              ]);
+            });
+        });
+        it('POST request returns 400 and message bad request when one "not null" property is missing', () => {
+          return request(app)
+            .post("/api/articles/2/comments")
+            .send({
+              username: "salexsmth"
+            })
+            .expect(400)
+            .then(response => {
+              expect(response.body).to.eql({ message: "Bad request" });
+            });
+        });
+        it("POST request returns 400 and message bad request when article_id does not exist", () => {
+          return request(app)
+            .post("/api/articles/340/comments")
+            .send({ username: "butter_bridge", body: "this is a new comment" })
+            .expect(400)
+            .then(response => {
+              expect(response.body).to.eql({ message: "Bad request" });
+            });
+        });
+      });
+      describe("/articles/:article_id/comments", () => {
+        it("GET request returns 200 and an array of all comments for the given article_id", () => {
+          return request(app)
+            .get("/api/articles/1/comments")
+            .expect(200)
+            .then(response => {
+              expect(response.body).to.be.an("object");
+              expect(response.body.comments[0]).to.have.keys([
+                "comment_id",
+                "votes",
+                "author",
+                "created_at",
+                "body"
+              ]);
+            });
+        });
+        it("GET request returns 200 and an array of all comments for the given article_id filtered by author username", () => {
+          return request(app)
+            .get("/api/articles/1/comments?sort_by=author")
+            .expect(200)
+            .then(response => {
+              expect(response.body).to.be.an("object");
+              expect(response.body.comments[0]).to.have.keys([
+                "comment_id",
+                "votes",
+                "author",
+                "created_at",
+                "body"
+              ]);
+              expect(response.body.comments).to.be.sortedBy("author", {
+                descending: true
+              });
+            });
+        });
+        it("GET request returns 400 and error message value does not exist when trying to filter comments by author but username does not exist", () => {
+          return request(app)
+            .get("/api/articles/1/comments?sort_by=salexsmith")
+            .expect(400)
+            .then(response => {
+              expect(response.body).to.eql({ message: "Bad request" });
+            });
+        });
+        it("GET request returns 200 and an array of all comments for the given article_id filtered by created_at as default and ordered in ascending order", () => {
+          return request(app)
+            .get("/api/articles/1/comments?order=")
+            .expect(200)
+            .then(response => {
+              expect(response.body).to.be.an("object");
+              expect(response.body.comments[0]).to.have.keys([
+                "comment_id",
+                "votes",
+                "author",
+                "created_at",
+                "body"
+              ]);
+              expect(response.body.comments).to.be.sortedBy("created_at", {
+                descending: true
+              });
+            });
+        });
+      });
+    });
+  });
+  describe("/comments/:comments_id", () => {
+    it("PATCH request returns 201 and the updated comment", () => {
+      return request(app)
+        .patch("/api/comments/1")
+        .send({ inc_votes: 10 })
+        .expect(202)
+        .then(response => {
+          expect(response.body).to.be.an("object");
+          expect(response.body.comment[0].votes).to.equal(10);
+        });
+    });
+    it("PATCH request returns 400 and correct error message when trying to update invalid comment", () => {
+      return request(app)
+        .patch("/api/comments/not_a_number")
+        .send({ inc_votes: 10 })
+        .expect(400)
+        .then(response => {
+          expect(response.body).to.eql({ message: "Bad request" });
+        });
+    });
+    it("PATCH request returns 400 and correct error message when trying to update article that does not exist", () => {
+      return request(app)
+        .patch("/api/comments/500")
+        .send({ inc_votes: 10 })
+        .expect(400)
+        .then(response => {
+          expect(response.body.message).to.eql("Value does not exist");
+        });
+    });
+    it("DELETE request returns 204 and has no body when deleting a comment", () => {
+      return request(app)
+        .delete("/api/comments/1")
+        .expect(204);
+    });
+    it("DELETE request returns 404 and error message when trying to delete comment that does not exist", () => {
+      return request(app)
+        .delete("/api/comments/0")
+        .expect(404)
+        .then(response => {
+          expect(response.body).to.eql({
+            message: "Value does not exist"
+          });
+        });
+    });
+    it("DELETE request returns 400 and error message when trying to delete comment with an invalid id", () => {
+      return request(app)
+        .delete("/api/comments/cats")
+        .expect(400)
+        .then(response => {
+          expect(response.body).to.eql({ message: "Bad request" });
+        });
     });
   });
 });

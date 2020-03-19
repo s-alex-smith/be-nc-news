@@ -7,7 +7,17 @@ exports.selectArticleById = article_id => {
     .where("articles.article_id", "=", article_id)
     .count("comment_id as comment_count")
     .leftJoin("comments", "articles.article_id", "comments.article_id")
-    .groupBy("articles.article_id");
+    .groupBy("articles.article_id")
+    .then(result => {
+      if (result.length === 0) {
+        return Promise.reject({
+          status: 400,
+          message: "Value does not exist"
+        });
+      } else {
+        return result;
+      }
+    });
 };
 
 exports.updateArticleVotes = (article_id, inc_votes) => {
@@ -42,12 +52,21 @@ exports.selectArticleComments = (article_id, query) => {
         delete comment.article_id;
         return comment;
       });
+    })
+    .then(result => {
+      if (result.length === 0) {
+        return Promise.reject({
+          status: 400,
+          message: "Value does not exist"
+        });
+      } else {
+        return result;
+      }
     });
 };
 
 exports.selectAllArticles = query => {
   const { sort_by, order, author, topic } = query;
-  console.log(author);
   return knex
     .select(
       "articles.author",
@@ -71,7 +90,17 @@ exports.selectAllArticles = query => {
       }
     })
     .leftJoin("comments", "articles.article_id", "comments.article_id")
-    .groupBy("articles.article_id");
+    .groupBy("articles.article_id")
+    .then(result => {
+      if (result.length === 0) {
+        return Promise.reject({
+          status: 400,
+          message: "Value does not exist"
+        });
+      } else {
+        return result;
+      }
+    });
 };
 
 exports.postNewComment = (article_id, reqBody) => {

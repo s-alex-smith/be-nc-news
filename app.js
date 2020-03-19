@@ -7,11 +7,11 @@ app.use(express.json());
 app.use("/api", apiRouter);
 
 app.use((err, req, res, next) => {
-  console.log(err);
-  if (err.code === "22P02" || err.code === "23502") {
+  const PSQLcodes = ["23502", "42703", "22P02", "23503"];
+  if (PSQLcodes.includes(err.code)) {
     res.status(400).send({ message: "Bad request" });
   } else {
-    res.status(400).send({ message: "Value does not exist" });
+    res.status(err.status).send({ message: err.message });
   }
 });
 

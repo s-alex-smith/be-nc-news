@@ -9,9 +9,11 @@ const {
 
 exports.getArticleById = (req, res, next) => {
   let { article_id } = req.params;
-  selectArticleById(article_id).then(([article]) => {
-    res.status(200).send({ article });
-  });
+  selectArticleById(article_id)
+    .then(([article]) => {
+      res.status(200).send({ article });
+    })
+    .catch(next);
 };
 
 exports.alterArticleVotes = (req, res, next) => {
@@ -25,21 +27,27 @@ exports.alterArticleVotes = (req, res, next) => {
 };
 
 exports.getArticleComments = (req, res, next) => {
-  selectArticleComments(req.params.article_id, req.query).then(comments => {
-    res.status(200).send({ comments });
-  });
+  selectArticleComments(req.params.article_id, req.query)
+    .then(comments => {
+      res.status(200).send({ comments });
+    })
+    .catch(next);
 };
 
 exports.getAllArticles = (req, res, next) => {
-  selectAllArticles(req.query).then(result => {
-    res.status(200).send(result);
-  });
+  selectAllArticles(req.query)
+    .then(result => {
+      res.status(200).send(result);
+    })
+    .catch(next);
 };
 
 exports.removeAComment = (req, res, next) => {
-  deleteAComment(req.params.comment_id).then(result => {
-    res.status(204).send();
-  });
+  deleteAComment(req.params.comment_id)
+    .then(result => {
+      res.status(204).send();
+    })
+    .catch(next);
 };
 
 exports.addNewComment = (req, res, next) => {

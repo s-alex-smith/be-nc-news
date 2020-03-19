@@ -6,7 +6,14 @@ exports.alterCommentVotes = (comment_id, inc_votes) => {
     .from("comments")
     .where("comment_id", "=", comment_id)
     .update({ votes: inc_votes })
-    .returning("*");
+    .returning("*")
+    .then(result => {
+      if (result.length === 0) {
+        return Promise.reject({ status: 400, message: "Value does not exist" });
+      } else {
+        return result;
+      }
+    });
 };
 
 exports.deleteAComment = comment_id => {
@@ -14,5 +21,17 @@ exports.deleteAComment = comment_id => {
     .select("*")
     .from("comments")
     .where("comment_id", "=", comment_id)
-    .del();
+    .returning("*")
+    .then(result => {
+      if (result.length === 0) {
+        return Promise.reject({
+          status: 404,
+          message: "Value does not exist"
+        });
+      } else {
+        return knex("comments")
+          .where("comment_id", comment_id)
+          .del();
+      }
+    });
 };
