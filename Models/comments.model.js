@@ -5,13 +5,14 @@ exports.alterCommentVotes = (comment_id, inc_votes) => {
     .select("*")
     .from("comments")
     .where("comment_id", "=", comment_id)
-    .update({ votes: inc_votes })
+    .increment({ votes: inc_votes })
     .returning("*")
     .then(result => {
+      console.log(result);
       if (result.length === 0) {
         return Promise.reject({
-          status: 400,
-          message: "Comment does not exist"
+          status: 404,
+          message: "Not found"
         });
       } else {
         return result;

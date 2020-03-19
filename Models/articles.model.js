@@ -11,8 +11,8 @@ exports.selectArticleById = article_id => {
     .then(result => {
       if (result.length === 0) {
         return Promise.reject({
-          status: 400,
-          message: "Article does not exist"
+          status: 404,
+          message: "Not found"
         });
       } else {
         return result;
@@ -25,9 +25,10 @@ exports.updateArticleVotes = (article_id, inc_votes) => {
     .select("*")
     .from("articles")
     .where("article_id", "=", article_id)
-    .update({ votes: inc_votes })
+    .increment({ votes: inc_votes })
     .returning("*")
     .then(result => {
+      console.log(result);
       if (result.length === 0) {
         return Promise.reject({
           status: 400,
@@ -55,12 +56,19 @@ exports.selectArticleComments = (article_id, query) => {
     })
     .then(result => {
       if (result.length === 0) {
-        return Promise.reject({
-          status: 400,
-          message: "Article does not exist"
-        });
+        return Promise.all([
+          checkValueExists("articles", "article_id", article_id),
+          result
+        ]);
       } else {
-        return result;
+        return [true, result];
+      }
+    })
+    .then(([doesExist, comments]) => {
+      if (doesExist) {
+        return comments;
+      } else {
+        return Promise.reject({ status: 404, message: "Not found" });
       }
     });
 };
@@ -92,13 +100,22 @@ exports.selectAllArticles = query => {
     .leftJoin("comments", "articles.article_id", "comments.article_id")
     .groupBy("articles.article_id")
     .then(result => {
-      if (result.length === 0) {
-        return Promise.reject({
-          status: 400,
-          message: "Article does not exist"
-        });
+      if (result.length === 0 && author) {
+        return Promise.all([
+          checkValueExists("users", "username", author),
+          result
+        ]);
+      } else if (result.length === 0 && topic) {
+        return Promise.all([checkValueExists("topics", "slug", topic), result]);
       } else {
-        return result;
+        return [true, result];
+      }
+    })
+    .then(([doesExist, articles]) => {
+      if (doesExist) {
+        return articles;
+      } else {
+        return Promise.reject({ status: 404, message: "Not found" });
       }
     });
 };
@@ -112,4 +129,12 @@ exports.postNewComment = (article_id, reqBody) => {
     .then(result => {
       return result;
     });
+};
+
+const checkValueExists = (table, column, query) => {
+  return knex(table)
+    .select()
+    .where({ [column]: query })
+    .first()
+    .then();
 };

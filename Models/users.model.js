@@ -12,8 +12,8 @@ exports.selectUserById = username => {
     .then(result => {
       if (result.length === 0) {
         return Promise.reject({
-          status: 400,
-          message: "User does not exist"
+          status: 404,
+          message: "Not found"
         });
       } else {
         return result;
