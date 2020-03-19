@@ -11,7 +11,7 @@ articlesRouter.route("/").get(getAllArticles);
 articlesRouter
   .route("/:article_id")
   .get(getArticleById)
-  .patch(alterArticleVotes);
+  .patch(alterArticleVotes); 
 articlesRouter
   .route("/:article_id/comments")
   .post(addNewComment)
