@@ -16,21 +16,26 @@ exports.updateArticleVotes = (article_id, inc_votes) => {
     .from("articles")
     .where("article_id", "=", article_id)
     .update({ votes: inc_votes })
-    .returning("*");
+    .returning("*")
+    .then(result => {
+      if (result.length === 0) {
+        return Promise.reject({
+          status: 400,
+          message: "Value does not exist"
+        });
+      } else {
+        return result;
+      }
+    });
 };
 
-exports.selectAllComments = article_id => {
-  return knex
-    .select("*")
-    .from("comments")
-    .where("article_id", "=", article_id);
-};
-
-exports.selectArticleComments = article_id => {
+exports.selectArticleComments = (article_id, query) => {
+  const { sort_by, order } = query;
   return knex
     .select("*")
     .from("comments")
     .where("article_id", "=", article_id)
+    .orderBy(sort_by || "created_at", order || "desc")
     .then(comments => {
       let newComments = { comments };
       return newComments.comments.map(comment => {
@@ -40,53 +45,42 @@ exports.selectArticleComments = article_id => {
     });
 };
 
-exports.selectAllArticles = sort_by => {
+exports.selectAllArticles = query => {
+  const { sort_by, order, author, topic } = query;
+  console.log(author);
   return knex
-    .select("articles.*")
+    .select(
+      "articles.author",
+      "articles.article_id",
+      "articles.votes",
+      "articles.title",
+      "articles.topic",
+      "articles.created_at"
+    )
     .from("articles")
     .count("comment_id as comment_count")
+    .orderBy(sort_by || "created_at", order || "desc")
     .modify(qb => {
-      if(sort_by !=== undefined){
-        return qb.where({sort_by})
+      if (author !== undefined) {
+        return qb.where({ "articles.author": author });
+      }
+    })
+    .modify(qb => {
+      if (topic !== undefined) {
+        return qb.where({ "articles.topic": topic });
       }
     })
     .leftJoin("comments", "articles.article_id", "comments.article_id")
-    .groupBy("articles.article_id")
-    .then(allArticles => {
-      return allArticles.map(article => {
-        delete article.body;
-        return article;
-      });
-    });
+    .groupBy("articles.article_id");
 };
 
-// exports.postNewComment = (article_id, comment) => {
-//   const getArticle = knex
-//     .select("*")
-//     .from("articles")
-//     .where("article_id", "=", article_id);
-//   const getUsers = knex
-//     .select("*")
-//     .from("users")
-//     .where("username", comment.username);
-//   const getComments = knex.select("*").from("comments");
-
-//   return Promise.all([getArticle, getUsers, getComments]).then(promise => {
-//     let [article] = promise[0];
-//     let user = promise[1];
-//     // let allComments = promise[2];
-//     return knex
-//       .insert(comment)
-//       .into("comments")
-//       .where(comment.username === user.username)
-//       .then(data => {
-//         return data;
-//       });
-//   });
-
-//   // return knex
-//   .insert(comment.body)
-//   .into("comments")
-//   .where(article_id === article_id && comment.username === username)
-//   .returning("*");
-// };
+exports.postNewComment = (article_id, reqBody) => {
+  let { username, body } = reqBody;
+  return knex
+    .insert({ body, author: username, article_id })
+    .into("comments")
+    .returning("*")
+    .then(result => {
+      return result;
+    });
+};

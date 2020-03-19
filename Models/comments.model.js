@@ -8,3 +8,11 @@ exports.alterCommentVotes = (comment_id, inc_votes) => {
     .update({ votes: inc_votes })
     .returning("*");
 };
+
+exports.deleteAComment = comment_id => {
+  return knex
+    .select("*")
+    .from("comments")
+    .where("comment_id", "=", comment_id)
+    .del();
+};

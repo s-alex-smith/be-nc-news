@@ -3,6 +3,7 @@ const {
   updateArticleVotes,
   selectArticleComments,
   selectAllArticles,
+  deleteAComment,
   postNewComment
 } = require("../Models/articles.model");
 
@@ -16,14 +17,15 @@ exports.getArticleById = (req, res, next) => {
 exports.alterArticleVotes = (req, res, next) => {
   let { article_id } = req.params;
   let { inc_votes } = req.body;
-  updateArticleVotes(article_id, inc_votes).then(article => {
-    res.status(202).send({ article });
-  });
+  updateArticleVotes(article_id, inc_votes)
+    .then(article => {
+      res.status(202).send({ article });
+    })
+    .catch(next);
 };
 
 exports.getArticleComments = (req, res, next) => {
-  let { article_id } = req.params;
-  selectArticleComments(article_id).then(comments => {
+  selectArticleComments(req.params.article_id, req.query).then(comments => {
     res.status(200).send({ comments });
   });
 };
@@ -34,8 +36,15 @@ exports.getAllArticles = (req, res, next) => {
   });
 };
 
-// exports.addNewComment = (req, res, next) => {
-//   let { article_id } = req.params;
-//   let comment = req.body;
-//   postNewComment(article_id, comment).then(data => console.log(data));
-// };
+exports.removeAComment = (req, res, next) => {
+  deleteAComment(req.params.comment_id).then(result => {
+    res.status(204).send();
+  });
+};
+
+exports.addNewComment = (req, res, next) => {
+  let { article_id } = req.params;
+  postNewComment(article_id, req.body)
+    .then(comment => res.status(201).send({ comment }))
+    .catch(next);
+};

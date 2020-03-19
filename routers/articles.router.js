@@ -14,7 +14,7 @@ articlesRouter
   .patch(alterArticleVotes);
 articlesRouter
   .route("/:article_id/comments")
-  // .post(addNewComment)
+  .post(addNewComment)
   .get(getArticleComments);
 
 module.exports = articlesRouter;
