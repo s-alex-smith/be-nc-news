@@ -9,7 +9,10 @@ exports.alterCommentVotes = (comment_id, inc_votes) => {
     .returning("*")
     .then(result => {
       if (result.length === 0) {
-        return Promise.reject({ status: 400, message: "Value does not exist" });
+        return Promise.reject({
+          status: 400,
+          message: "Comment does not exist"
+        });
       } else {
         return result;
       }
@@ -26,7 +29,7 @@ exports.deleteAComment = comment_id => {
       if (result.length === 0) {
         return Promise.reject({
           status: 404,
-          message: "Value does not exist"
+          message: "Comment does not exist"
         });
       } else {
         return knex("comments")

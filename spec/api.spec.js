@@ -42,7 +42,7 @@ describe("/api", () => {
         .get("/api/users/does_not_exist")
         .expect(400)
         .then(response => {
-          expect(response.body.message).to.equal("Value does not exist");
+          expect(response.body.message).to.equal("User does not exist");
         });
     });
   });
@@ -180,7 +180,7 @@ describe("/api", () => {
           .get("/api/articles?topic=ducks")
           .expect(400)
           .then(response => {
-            expect(response.body).to.eql({ message: "Value does not exist" });
+            expect(response.body).to.eql({ message: "Article does not exist" });
           });
       });
       it("GET request returns 400 and error message bad request when articles filtered by non-existent username", () => {
@@ -188,7 +188,7 @@ describe("/api", () => {
           .get("/api/articles?author=salex")
           .expect(400)
           .then(response => {
-            expect(response.body).to.eql({ message: "Value does not exist" });
+            expect(response.body).to.eql({ message: "Article does not exist" });
           });
       });
       describe("/articles/:article_id", () => {
@@ -215,7 +215,9 @@ describe("/api", () => {
             .get("/api/articles/500")
             .expect(400)
             .then(response => {
-              expect(response.body).to.eql({ message: "Value does not exist" });
+              expect(response.body).to.eql({
+                message: "Article does not exist"
+              });
             });
         });
         it("GET request returns 400 and the correct error message when an invalid article_id is passed", () => {
@@ -251,7 +253,7 @@ describe("/api", () => {
             .send({ inc_votes: 10 })
             .expect(400)
             .then(response => {
-              expect(response.body.message).to.eql("Value does not exist");
+              expect(response.body.message).to.eql("Article does not exist");
             });
         });
       });
@@ -377,13 +379,13 @@ describe("/api", () => {
           expect(response.body).to.eql({ message: "Bad request" });
         });
     });
-    it("PATCH request returns 400 and correct error message when trying to update article that does not exist", () => {
+    it("PATCH request returns 400 and correct error message when trying to update comment that does not exist", () => {
       return request(app)
         .patch("/api/comments/500")
         .send({ inc_votes: 10 })
         .expect(400)
         .then(response => {
-          expect(response.body.message).to.eql("Value does not exist");
+          expect(response.body.message).to.eql("Comment does not exist");
         });
     });
     it("DELETE request returns 204 and has no body when deleting a comment", () => {
@@ -397,7 +399,7 @@ describe("/api", () => {
         .expect(404)
         .then(response => {
           expect(response.body).to.eql({
-            message: "Value does not exist"
+            message: "Comment does not exist"
           });
         });
     });

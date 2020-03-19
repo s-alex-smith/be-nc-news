@@ -12,7 +12,7 @@ exports.selectArticleById = article_id => {
       if (result.length === 0) {
         return Promise.reject({
           status: 400,
-          message: "Value does not exist"
+          message: "Article does not exist"
         });
       } else {
         return result;
@@ -31,7 +31,7 @@ exports.updateArticleVotes = (article_id, inc_votes) => {
       if (result.length === 0) {
         return Promise.reject({
           status: 400,
-          message: "Value does not exist"
+          message: "Article does not exist"
         });
       } else {
         return result;
@@ -57,7 +57,7 @@ exports.selectArticleComments = (article_id, query) => {
       if (result.length === 0) {
         return Promise.reject({
           status: 400,
-          message: "Value does not exist"
+          message: "Article does not exist"
         });
       } else {
         return result;
@@ -95,7 +95,7 @@ exports.selectAllArticles = query => {
       if (result.length === 0) {
         return Promise.reject({
           status: 400,
-          message: "Value does not exist"
+          message: "Article does not exist"
         });
       } else {
         return result;

@@ -13,7 +13,7 @@ exports.selectUserById = username => {
       if (result.length === 0) {
         return Promise.reject({
           status: 400,
-          message: "Value does not exist"
+          message: "User does not exist"
         });
       } else {
         return result;
