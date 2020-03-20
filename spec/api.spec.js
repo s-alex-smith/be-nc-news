@@ -10,7 +10,7 @@ const knex = require("../connection");
 describe("/api", () => {
   beforeEach(() => knex.seed.run());
   after(() => knex.destroy());
-  it.only("GET request returns 200 and the endpoints.json file", () => {
+  it("GET request returns 200 and the endpoints.json file", () => {
     return request(app)
       .get("/api")
       .expect(200)
@@ -53,14 +53,13 @@ describe("/api", () => {
         .expect(200)
         .then(response => {
           expect(response.body).to.be.an("object");
-          expect(response.body).to.have.keys(["users"]);
-          expect(response.body.users[0]).to.have.keys([
+          expect(response.body).to.have.keys(["user"]);
+          expect(response.body.user).to.have.keys([
             "username",
             "avatar_url",
             "name"
           ]);
-          expect(response.body.users.length).to.equal(1);
-          expect(response.body.users[0].username).to.equal("butter_bridge");
+          expect(response.body.user.username).to.equal("butter_bridge");
         });
     });
     it("GET request returns 404 and error message when nonexistent username is used in the query", () => {
@@ -247,8 +246,8 @@ describe("/api", () => {
             .expect(200)
             .then(response => {
               expect(response.body).to.be.an("object");
-              expect(response.body).to.have.keys(["articles"]);
-              expect(response.body.articles[0]).to.have.keys([
+              expect(response.body).to.have.keys(["article"]);
+              expect(response.body.article).to.have.keys([
                 "author",
                 "title",
                 "article_id",
@@ -285,8 +284,8 @@ describe("/api", () => {
             .expect(200)
             .then(response => {
               expect(response.body).to.be.an("object");
-              expect(response.body).to.have.keys(["articles"]);
-              expect(response.body.articles[0].votes).to.equal(110);
+              expect(response.body).to.have.keys(["article"]);
+              expect(response.body.article.votes).to.equal(110);
             });
         });
         it("PATCH request returns 400 and correct error message when trying to update invalid article", () => {
@@ -323,9 +322,10 @@ describe("/api", () => {
             .send({ username: "butter_bridge", body: "this is a new comment" })
             .expect(201)
             .then(response => {
+              console.log(response.body);
               expect(response.body).to.be.an("object");
-              expect(response.body).to.have.keys(["comments"]);
-              expect(response.body.comments[0]).to.have.keys([
+              expect(response.body).to.have.keys(["comment"]);
+              expect(response.body.comment).to.have.keys([
                 "body",
                 "article_id",
                 "author",
@@ -333,7 +333,7 @@ describe("/api", () => {
                 "comment_id",
                 "created_at"
               ]);
-              expect(response.body.comments[0].votes).to.eql(0);
+              expect(response.body.comment.votes).to.eql(0);
             });
         });
         it('POST request returns 400 and message bad request when one "not null" property is missing', () => {
@@ -448,7 +448,7 @@ describe("/api", () => {
         .then(response => {
           expect(response.body).to.be.an("object");
           expect(response.body).to.have.keys(["comment"]);
-          expect(response.body.comment[0].votes).to.equal(26);
+          expect(response.body.comment.votes).to.equal(26);
         });
     });
     it("PATCH request returns 400 and correct error message when trying to update invalid comment", () => {

@@ -10,8 +10,8 @@ const {
 exports.getArticleById = (req, res, next) => {
   let { article_id } = req.params;
   selectArticleById(article_id)
-    .then(articles => {
-      res.status(200).send({ articles });
+    .then(([article]) => {
+      res.status(200).send({ article });
     })
     .catch(next);
 };
@@ -20,8 +20,8 @@ exports.alterArticleVotes = (req, res, next) => {
   let { article_id } = req.params;
   let { inc_votes } = req.body;
   updateArticleVotes(article_id, inc_votes)
-    .then(articles => {
-      res.status(200).send({ articles });
+    .then(([article]) => {
+      res.status(200).send({ article });
     })
     .catch(next);
 };
@@ -54,6 +54,6 @@ exports.removeAComment = (req, res, next) => {
 exports.addNewComment = (req, res, next) => {
   let { article_id } = req.params;
   postNewComment(article_id, req.body)
-    .then(comments => res.status(201).send({ comments }))
+    .then(([comment]) => res.status(201).send({ comment }))
     .catch(next);
 };

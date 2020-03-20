@@ -28,7 +28,6 @@ exports.updateArticleVotes = (article_id, inc_votes) => {
     .increment({ votes: inc_votes })
     .returning("*")
     .then(result => {
-      console.log(result);
       if (result.length === 0) {
         return Promise.reject({
           status: 400,
