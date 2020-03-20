@@ -288,6 +288,30 @@ describe("/api", () => {
               expect(response.body.article.votes).to.equal(110);
             });
         });
+        it("PATCH request returns 200 and the original article when not nullable field is missing", () => {
+          return request(app)
+            .patch("/api/articles/1")
+            .send({})
+            .expect(200)
+            .then(response => {
+              console.log(response.body);
+              expect(response.body).to.be.an("object");
+              expect(response.body).to.have.keys(["article"]);
+              expect(response.body.article).to.have.keys([
+                "article_id",
+                "title",
+                "topic",
+                "author",
+                "body",
+                "created_at",
+                "votes"
+              ]);
+              expect(response.body.article.votes).to.eql(100);
+              expect(response.body.article.body).to.eql(
+                "I find this existence challenging"
+              );
+            });
+        });
         it("PATCH request returns 400 and correct error message when trying to update invalid article", () => {
           return request(app)
             .patch("/api/articles/not_a_number")
@@ -336,12 +360,10 @@ describe("/api", () => {
               expect(response.body.comment.votes).to.eql(0);
             });
         });
-        it('POST request returns 400 and message bad request when one "not null" property is missing', () => {
+        it('POST request returns 400 and message bad request when "not null" property is missing', () => {
           return request(app)
             .post("/api/articles/2/comments")
-            .send({
-              username: "butter_bridge"
-            })
+            .send({})
             .expect(400)
             .then(response => {
               expect(response.body).to.eql({ message: "Bad request" });
@@ -449,6 +471,16 @@ describe("/api", () => {
           expect(response.body).to.be.an("object");
           expect(response.body).to.have.keys(["comment"]);
           expect(response.body.comment.votes).to.equal(26);
+        });
+    });
+    it("PATCH request returns 200 and the original comment when body does not include inc_votes property", () => {
+      return request(app)
+        .patch("/api/comments/1")
+        .send({})
+        .expect(200)
+        .then(response => {
+          expect(response.body).to.be.an("object");
+          expect(response.body).to.have.keys(["comment"]);
         });
     });
     it("PATCH request returns 400 and correct error message when trying to update invalid comment", () => {

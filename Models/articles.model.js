@@ -25,7 +25,11 @@ exports.updateArticleVotes = (article_id, inc_votes) => {
     .select("*")
     .from("articles")
     .where("article_id", "=", article_id)
-    .increment({ votes: inc_votes })
+    .modify(qb => {
+      if (inc_votes !== undefined) {
+        return qb.increment({ votes: inc_votes });
+      }
+    })
     .returning("*")
     .then(result => {
       if (result.length === 0) {
