@@ -19,7 +19,9 @@ This initial page gives a full description of the available endpoints.
 
 Each test checks each endpoint is working and functional. The tests utilise the test-data.
 
+```bash
 npm run test
+```
 
 ### Built With
 
