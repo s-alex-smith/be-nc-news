@@ -10,6 +10,14 @@ const knex = require("../connection");
 describe("/api", () => {
   beforeEach(() => knex.seed.run());
   after(() => knex.destroy());
+  it.only("GET request returns 200 and the endpoints.json file", () => {
+    return request(app)
+      .get("/api")
+      .expect(200)
+      .then(response => {
+        expect(response.body.data).to.be.an("object");
+      });
+  });
   it("DELETE returns 405 method not allowed", () => {
     return request(app)
       .delete("/api")
@@ -26,7 +34,6 @@ describe("/api", () => {
         .then(response => {
           expect(response.body).to.be.an("object");
           expect(response.body).to.have.keys(["topics"]);
-          expect(response.body.topics).to.be.an("array");
           expect(response.body.topics[0]).to.have.keys(["slug", "description"]);
         });
     });
