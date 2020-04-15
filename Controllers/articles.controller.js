@@ -4,7 +4,7 @@ const {
   selectArticleComments,
   selectAllArticles,
   deleteAComment,
-  postNewComment
+  postNewComment,
 } = require("../Models/articles.model");
 
 exports.getArticleById = (req, res, next) => {
@@ -17,6 +17,7 @@ exports.getArticleById = (req, res, next) => {
 };
 
 exports.alterArticleVotes = (req, res, next) => {
+  console.log(req);
   let { article_id } = req.params;
   let { inc_votes } = req.body;
   updateArticleVotes(article_id, inc_votes)
@@ -28,7 +29,7 @@ exports.alterArticleVotes = (req, res, next) => {
 
 exports.getArticleComments = (req, res, next) => {
   selectArticleComments(req.params.article_id, req.query)
-    .then(comments => {
+    .then((comments) => {
       res.status(200).send({ comments });
     })
     .catch(next);
@@ -36,7 +37,7 @@ exports.getArticleComments = (req, res, next) => {
 
 exports.getAllArticles = (req, res, next) => {
   selectAllArticles(req.query)
-    .then(articles => {
+    .then((articles) => {
       console.log(articles);
       res.status(200).send({ articles });
     })
@@ -45,7 +46,7 @@ exports.getAllArticles = (req, res, next) => {
 
 exports.removeAComment = (req, res, next) => {
   deleteAComment(req.params.comment_id)
-    .then(result => {
+    .then((result) => {
       res.status(204).send();
     })
     .catch(next);

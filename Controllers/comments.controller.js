@@ -1,9 +1,10 @@
 const {
   alterCommentVotes,
-  deleteAComment
+  deleteAComment,
 } = require("../Models/comments.model");
 
 exports.amendCommentById = (req, res, next) => {
+  // console.log(req);
   let { comment_id } = req.params;
   let { inc_votes } = req.body;
   alterCommentVotes(comment_id, inc_votes)
@@ -16,7 +17,7 @@ exports.amendCommentById = (req, res, next) => {
 exports.removeAComment = (req, res, next) => {
   let { comment_id } = req.params;
   deleteAComment(comment_id)
-    .then(result => {
+    .then((result) => {
       res.status(204).send();
     })
     .catch(next);

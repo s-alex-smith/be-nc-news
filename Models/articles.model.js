@@ -1,6 +1,6 @@
 const knex = require("../connection");
 
-exports.selectArticleById = article_id => {
+exports.selectArticleById = (article_id) => {
   return knex
     .select("articles.*")
     .from("articles")
@@ -8,11 +8,11 @@ exports.selectArticleById = article_id => {
     .count("comment_id as comment_count")
     .leftJoin("comments", "articles.article_id", "comments.article_id")
     .groupBy("articles.article_id")
-    .then(result => {
+    .then((result) => {
       if (result.length === 0) {
         return Promise.reject({
           status: 404,
-          message: "Not found"
+          message: "Not found",
         });
       } else {
         return result;
@@ -25,17 +25,17 @@ exports.updateArticleVotes = (article_id, inc_votes) => {
     .select("*")
     .from("articles")
     .where("article_id", "=", article_id)
-    .modify(qb => {
+    .modify((qb) => {
       if (inc_votes !== undefined) {
         return qb.increment({ votes: inc_votes });
       }
     })
     .returning("*")
-    .then(result => {
+    .then((result) => {
       if (result.length === 0) {
         return Promise.reject({
           status: 400,
-          message: "Article does not exist"
+          message: "Article does not exist",
         });
       } else {
         return result;
@@ -50,18 +50,18 @@ exports.selectArticleComments = (article_id, query) => {
     .from("comments")
     .where("article_id", "=", article_id)
     .orderBy(sort_by || "created_at", order || "desc")
-    .then(comments => {
+    .then((comments) => {
       let newComments = { comments };
-      return newComments.comments.map(comment => {
+      return newComments.comments.map((comment) => {
         delete comment.article_id;
         return comment;
       });
     })
-    .then(result => {
+    .then((result) => {
       if (result.length === 0) {
         return Promise.all([
           checkValueExists("articles", "article_id", article_id),
-          result
+          result,
         ]);
       } else {
         return [true, result];
@@ -76,7 +76,7 @@ exports.selectArticleComments = (article_id, query) => {
     });
 };
 
-exports.selectAllArticles = query => {
+exports.selectAllArticles = (query) => {
   const { sort_by, order, author, topic } = query;
   return knex
     .select(
@@ -90,23 +90,23 @@ exports.selectAllArticles = query => {
     .from("articles")
     .count("comment_id as comment_count")
     .orderBy(sort_by || "created_at", order || "desc")
-    .modify(qb => {
+    .modify((qb) => {
       if (author !== undefined) {
         return qb.where({ "articles.author": author });
       }
     })
-    .modify(qb => {
+    .modify((qb) => {
       if (topic !== undefined) {
         return qb.where({ "articles.topic": topic });
       }
     })
     .leftJoin("comments", "articles.article_id", "comments.article_id")
     .groupBy("articles.article_id")
-    .then(result => {
+    .then((result) => {
       if (result.length === 0 && author) {
         return Promise.all([
           checkValueExists("users", "username", author),
-          result
+          result,
         ]);
       } else if (result.length === 0 && topic) {
         return Promise.all([checkValueExists("topics", "slug", topic), result]);
@@ -129,7 +129,7 @@ exports.postNewComment = (article_id, reqBody) => {
     .insert({ body, author: username, article_id })
     .into("comments")
     .returning("*")
-    .then(result => {
+    .then((result) => {
       return result;
     });
 };

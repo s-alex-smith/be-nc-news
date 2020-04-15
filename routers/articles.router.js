@@ -4,7 +4,7 @@ const {
   alterArticleVotes,
   addNewComment,
   getArticleComments,
-  getAllArticles
+  getAllArticles,
 } = require("../Controllers/articles.controller");
 
 articlesRouter
